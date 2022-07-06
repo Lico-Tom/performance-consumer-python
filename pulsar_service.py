@@ -19,12 +19,19 @@
 
 import os
 
-import pulsar_service
+import pulsar
 
-if __name__ == '__main__':
-    print("performance consumer start")
-    consume_type = os.environ.get("CONSUME_TYPE")
-    if consume_type is None:
-        print("do nothing")
-    elif consume_type == "pulsar":
-        pulsar_service.start()
+pulsar_host = os.environ.get("PULSAR_HOST", "localhost")
+pulsar_port = os.environ.get("PULSAR_PORT", "6650")
+
+
+def start():
+    client = pulsar.Client('pulsar://{}:{}'.format(pulsar_host, pulsar_port))
+    consumer = client.subscribe(os.environ.get("PULSAR_TOPIC"), os.environ.get("PULSAR_SUBSCRIPTION_NAME"))
+    while True:
+        msg = consumer.receive()
+        try:
+            print("Received message '{}' id='{}'".format(msg.data(), msg.message_id()))
+            consumer.acknowledge(msg)
+        except Exception:
+            consumer.negative_acknowledge(msg)
