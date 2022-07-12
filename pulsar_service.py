@@ -23,11 +23,12 @@ import pulsar
 
 pulsar_host = os.environ.get("PULSAR_HOST", "localhost")
 pulsar_port = os.environ.get("PULSAR_PORT", "6650")
+pulsar_subscription_type = os.environ.get("PULSAR_SUBSCRIPTION_TYPE", "Failover")
 
 
 def start():
     client = pulsar.Client('pulsar://{}:{}'.format(pulsar_host, pulsar_port))
-    consumer = client.subscribe(os.environ.get("PULSAR_TOPIC"), os.environ.get("PULSAR_SUBSCRIPTION_NAME"))
+    consumer = client.pulsar_subscribe_type(pulsar_subscription_type).subscribe(os.environ.get("PULSAR_TOPIC"), os.environ.get("PULSAR_SUBSCRIPTION_NAME"))
     while True:
         msg = consumer.receive()
         try:
